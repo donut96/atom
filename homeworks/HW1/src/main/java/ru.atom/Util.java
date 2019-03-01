@@ -33,6 +33,7 @@ public class Util {
         return stream.max().getAsInt();
     }
 
+
     /**
      * Returns the sum of all {@code int} values.
      *
