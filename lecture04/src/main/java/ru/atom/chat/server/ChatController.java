@@ -59,16 +59,73 @@ public class ChatController {
     /**
      * curl -X POST -i localhost:8080/chat/logout -d "name=I_AM_STUPID"
      */
-    //TODO
+    @RequestMapping(
+            path = "logout",
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<String> logout(@RequestParam("name") String name) {
+        if (!usersOnline.containsKey(name)) {
+            return ResponseEntity.badRequest().body("User '" + name  + "' was not logged in.");
+        }
+        usersOnline.remove(name);
+        messages.add("[" + name + "] logged out");
+        return ResponseEntity.ok().build();
+    }
 
     /**
      * curl -X POST -i localhost:8080/chat/say -d "name=I_AM_STUPID&msg=Hello everyone in this chat"
      */
-    //TODO
+    @RequestMapping(
+            path = "say",
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<String> say(@RequestParam("name") String name, @RequestParam("msg") String msg) {
+        if (!usersOnline.containsKey(name)) {
+            return ResponseEntity.badRequest().body("User '" + name  + "' was not logged in.");
+        }
+        messages.add("[" + name + "]: " + msg);
+        return ResponseEntity.ok().build();
+    }
 
 
     /**
      * curl -i localhost:8080/chat/chat
      */
-    //TODO
+    @RequestMapping(
+            path = "chat",
+            method = RequestMethod.GET,
+            produces = MediaType.TEXT_PLAIN_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<String> say() {
+        String responseBody = String.join("\n", messages);
+        return ResponseEntity.ok(responseBody);
+    }
+
+    @RequestMapping(
+            path = "recant",
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<String> recant(@RequestParam("name") String name, @RequestParam("msg") String msg) {
+        if (!usersOnline.containsKey(name)) {
+            return ResponseEntity.badRequest().body("User '" + name  + "' was not logged in.");
+        }
+        if (!messages.contains("[" + name + "]: " + msg)) {
+            return ResponseEntity.badRequest().body("This message does not exist");
+        }
+        messages.remove("[" + name + "]: " + msg);
+        return ResponseEntity.noContent().build();
+    }
+
+    @RequestMapping(
+            path = "clear",
+            method = RequestMethod.DELETE,
+            produces = MediaType.TEXT_PLAIN_VALUE
+    )
+    public ResponseEntity clear() {
+        messages.clear();
+        return ResponseEntity.noContent().build();
+    }
 }
